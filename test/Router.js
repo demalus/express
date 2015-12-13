@@ -351,6 +351,7 @@ describe('Router', function(){
       router.use.bind(router, '/', 5).should.throw(/requires middleware function.*number/)
       router.use.bind(router, '/', null).should.throw(/requires middleware function.*Null/)
       router.use.bind(router, '/', new Date()).should.throw(/requires middleware function.*Date/)
+      router.use.bind(router, '/', true).should.throw(/requires middleware functions/)
     })
 
     it('should accept array of middleware', function(done){
@@ -373,6 +374,30 @@ describe('Router', function(){
       });
 
       router.handle({ url: '/foo', method: 'GET' }, {}, function(){});
+    })
+
+    it('should accept a bool for private mode after the middleware functions', function(done) {
+      var count = 0;
+      var router = new Router();
+
+      function fn1(req, res, next) {
+        assert.equal(++count, 1);
+        next();
+      }
+
+      function fn2(req, res, next) {
+        assert.equal(++count, 2);
+        next();
+      }
+
+      function fn3(req, res, next) {
+        assert.equal(++count, 3);
+        next();
+      }
+
+      router.use(fn1, fn2, fn3, true);
+
+      router.handle({ url: '/foo', method: 'GET' }, {}, done);
     })
   })
 
